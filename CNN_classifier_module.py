@@ -26,6 +26,15 @@ class CNN_classifier():
         self.modelIsPrepared = False
         self.modelIsTrained = False
         self.alreadyReduced = False
+       
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+    
+    def __del__(self):
+        pass
         
     #load, normalize, and preprocess data
     def prepareData(self,test_size=0.2):
@@ -113,16 +122,20 @@ class CNN_classifier():
         self.modelIsPrepared = True
 
     #then train the neural network
-    def training(self,epochs):
+    def training(self,epochs,early=True):
         assert self.modelIsPrepared, "Model not prepared yet. Do CNN_classifier.CNN()."
         
         #introduce early stopping
         stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=100)
+        
+        callbacks =[]
+        if early:
+            callbacks += [stop_early]
     
         self.hist = self.model.fit(self.X_train, self.Y_train, \
                      epochs=epochs,verbose=0,\
                      validation_split=.2,batch_size=128,\
-                     callbacks=[stop_early])
+                     callbacks=callbacks)
         self.modelIsTrained = True
 
     def plotLoss(self):
